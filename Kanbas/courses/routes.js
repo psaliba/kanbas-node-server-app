@@ -1,38 +1,43 @@
-import { db } from "../database/index.js";
+import * as dao from "./dao.js";
 
 export default function CourseRoutes(app) {
-    app.get("/api/courses", (req, res) => {
-        const courses = db.courses;
-        res.send(courses);
+    const getCourses = async (req, res) => {
+        const courses = await dao.findAllCourses();
+        res.json(courses);
+    }
+    app.get("/api/courses", getCourses);
 
-    app.post("/api/courses", (req, res) => {
-        const course = { ...req.body,
-        _id: new Date().getTime().toString() };
-        db.courses.push(course);
-        res.send(course);
-    });
 
-    app.delete("/api/courses/:id", (req, res) => {
-        const id = req.params.id;
-        db.courses = db.courses.filter((course) => course._id !== id);
-        res.send(204);
-    });
+    const createCourse = async (req, res) => {
+        const course = await dao.createCourse(req.body);
+        res.json(course);
+    }
 
-    app.put("/api/courses/:id", (req, res) => {
-        const id = req.params.id;
-        const course = db.courses.find((course) => course._id === id);
-        Object.assign(course, req.body);
-        res.send(204);
-    });
+    app.post("/api/courses", createCourse);
 
-    app.get("/api/courses/:id", (req, res) => {
-        const id = req.params.id;
-        const course = db.courses.find((course) => course._id === id);
+
+    const deleteCourse = async (req, res) => {
+        const status = await dao.deleteCourse(req.params._id);
+        res.json(status);
+    }
+    app.delete("/api/courses/:_id", deleteCourse);
+
+    const updateCourse = async (req, res) => {
+        const { courseId } = req.params;
+        const status = await dao.updateCourse(courseId, req.body);
+        res.json(status);
+    }
+    app.put("/api/courses/:courseId", updateCourse);
+
+    const getCourseById = async (req, res) => {
+        const course = await dao.findCourseById(req.params.courseId);
         if (!course) {
             res.status(404).send("Course not found");
             return;
         }
-        res.send(course);
-    })
-})}
+        res.json(course);
+    }
+
+    app.get("/api/courses/:courseId", getCourseById);
+}
 

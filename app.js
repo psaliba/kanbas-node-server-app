@@ -9,9 +9,7 @@ import UserRoutes from "./Kanbas/users/routes.js";
 import session from "express-session";
 import "dotenv/config";
 
-await mongoose.connect(process.env.DB_CONNECTION_STRING, {
-    directConnection: true
-});
+await mongoose.connect(process.env.DB_CONNECTION_STRING);
 
 const app = express();
 app.use(cors({
